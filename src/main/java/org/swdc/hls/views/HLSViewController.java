@@ -22,8 +22,6 @@ import java.util.ResourceBundle;
 
 public class HLSViewController extends ViewController<HLSMainView> {
 
-    @Inject
-    private SourceView sourceView;
 
     @Inject
     private HlsConfigure configure;
@@ -129,10 +127,6 @@ public class HLSViewController extends ViewController<HLSMainView> {
         }
     }
 
-    @FXML
-    public void onBrowserAnalysis() {
-        sourceView.show();
-    }
 
     @FXML
     private void onBrowserOutput() {
