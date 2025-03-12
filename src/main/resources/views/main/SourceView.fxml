@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="478.0" prefWidth="673.0" styleClass="stage" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.swdc.hls.views.SourceController">
+   <center>
+      <TableView fx:id="tableView" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+        <columns>
+          <TableColumn fx:id="colDesc" prefWidth="75.0" text="描述" />
+          <TableColumn fx:id="colUrl" prefWidth="75.0" text="URL" />
+        </columns>
+         <columnResizePolicy>
+            <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+         </columnResizePolicy>
+      </TableView>
+   </center>
+   <top>
+      <HBox alignment="CENTER_LEFT" prefHeight="39.0" prefWidth="649.0" spacing="12.0" BorderPane.alignment="CENTER">
+         <children>
+            <Label text="选择年份和月份来检索灯塔课程：" />
+            <HBox prefHeight="100.0" prefWidth="200.0" HBox.hgrow="ALWAYS" />
+            <DatePicker fx:id="dateSelector" minHeight="28.0" />
+         </children>
+      </HBox>
+   </top>
+   <padding>
+      <Insets bottom="12.0" left="12.0" right="12.0" top="12.0" />
+   </padding>
+</BorderPane>

@@ -1,0 +1,93 @@
+@background: #FFFFFF;
+@primary: #D8665B;
+@secondary: #A0BA7E;
+
+@editable: #E8EBE8;
+@text: #596662;
+.progress(@color) {
+
+    .track {
+        -fx-background-color: @background;
+        -fx-background-radius: 8;
+        -fx-border-color: @editable;
+        -fx-border-width: 1;
+        -fx-border-style: solid;
+        -fx-border-radius: 8;
+
+    }
+    .bar {
+        -fx-background-color: @color;
+        -fx-background-radius: 8;
+    }
+}
+
+.stage {
+
+    -fx-background-color: @background;
+
+    .button-primary {
+
+        -fx-background-color: @primary;
+        -fx-text-fill: @background;
+        -fx-background-radius: 8;
+        &:hover {
+            -fx-background-color: darken(@primary, 10%);
+        }
+    }
+
+    .button-normal {
+        -fx-background-color: @secondary;
+        -fx-text-fill: @background;
+        -fx-background-radius: 8;
+        &:hover {
+            -fx-background-color: darken(@secondary, 10%);
+        }
+    }
+
+    .field {
+
+        -fx-background-color: @editable;
+        -fx-background-radius: 8;
+
+    }
+
+    .table-view {
+        -fx-background-color: @background;
+        -fx-border-color: @editable;
+        -fx-border-width: 1;
+        -fx-border-style: solid;
+        -fx-border-radius: 8;
+
+        .column-header-background {
+            -fx-background-color:  rgba(255,255,255,0);
+            .filler {
+                -fx-background-color:@background;
+                -fx-background-radius: 0;
+            }
+        }
+        .column-header {
+            -fx-background-color:transparent;
+            -fx-border-color: @editable;
+            -fx-border-width: 0 1 1 0;
+            -fx-border-style: solid;
+            .label {
+                -fx-text-fill: @text;
+            }
+        }
+        .table-row-cell {
+            -fx-background-color: @background;
+            .progress-bar {
+                .progress(@secondary);
+            }
+            .cell {
+                -fx-alignment: center;
+            }
+            &:selected {
+                -fx-background-color: @editable;
+                -fx-text-background-color: @text;
+            }
+        }
+    }
+
+}
+
