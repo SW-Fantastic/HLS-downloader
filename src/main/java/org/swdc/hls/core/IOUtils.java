@@ -1,5 +1,6 @@
 package org.swdc.hls.core;
 
+import org.bytedeco.ffmpeg.global.avutil;
 import org.slf4j.Logger;
 
 import java.io.InputStream;
@@ -50,6 +51,22 @@ public class IOUtils {
             return new String(bytes, StandardCharsets.UTF_8);
         }
         return null;
+    }
+
+    /**
+     * 将FFMpeg的异常转换为JavaException
+     * @param errCode 异常编码
+     * @return 运行时异常
+     */
+    public static String getException(int errCode) {
+        byte[] err = new byte[128];
+        avutil.av_make_error_string(err,err.length - 1,errCode);
+        for (int idx = err.length - 1; idx > 0; idx --) {
+            if (err[idx] != 0) {
+                return new String(err,0,idx + 1);
+            }
+        }
+        return new String(err, StandardCharsets.UTF_8);
     }
 
 }

@@ -143,7 +143,8 @@ public class HLSDownloadTask {
     public void merge() {
 
         progress.set(0);
-        HLSMerger merger = new HLSMerger(playlist, segmentDir, new File(outputDir, fileName + ".mp4"));
+        File targetFile = new File(outputDir, fileName + ".mp4");
+        HLSMerger merger = new HLSMerger(playlist, segmentDir, targetFile);
         merger.setProgressListener((direction, merged, totals) -> {
             progress.set(merged / (double) totals);
             status.set("正在合并");
@@ -160,8 +161,13 @@ public class HLSDownloadTask {
         }
 
         segmentDir.delete();
+        if (merger.isFailed()) {
+            targetFile.delete();
+            status.set("下载失败");
+        } else {
+            status.set("完成");
+        }
 
-        status.set("完成");
     }
 
     /**

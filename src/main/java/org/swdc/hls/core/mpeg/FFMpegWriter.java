@@ -8,6 +8,7 @@ import org.bytedeco.ffmpeg.avutil.AVDictionary;
 import org.bytedeco.ffmpeg.global.avcodec;
 import org.bytedeco.ffmpeg.global.avformat;
 import org.bytedeco.ffmpeg.global.avutil;
+import org.swdc.hls.core.IOUtils;
 
 import java.io.Closeable;
 import java.io.File;
@@ -26,11 +27,18 @@ public class FFMpegWriter implements Closeable {
 
     private File targetFile;
 
+    private boolean exception = false;
+
     public FFMpegWriter(File targetFile) {
         this.targetFile = targetFile;
     }
 
     public boolean open() {
+
+        if (opend) {
+            return true;
+        }
+
         outputContext = avformat.avformat_alloc_context();
         int state = avformat.avformat_alloc_output_context2(outputContext, null, null, targetFile.getAbsolutePath());
         if (state < 0) {
@@ -76,20 +84,28 @@ public class FFMpegWriter implements Closeable {
         }
         for (int i = 0; i < sourceContext.nb_streams(); ++i) {
             AVStream stream = sourceContext.streams(i);
-            if (stream.codecpar().codec_type() == avutil.AVMEDIA_TYPE_AUDIO || stream.codecpar().codec_type() == avutil.AVMEDIA_TYPE_VIDEO) {
-                AVStream newStream = avformat.avformat_new_stream(outputContext, null);
-                if (newStream == null) {
-                    return false;
-                }
-                avcodec.avcodec_parameters_copy(newStream.codecpar(), stream.codecpar());
-                // Codec tag不一致时，会导致写入文件失败，这里设置为0来解决这个问题。
-                newStream.codecpar().codec_tag(0);
-                if (stream.codecpar().codec_type() == avutil.AVMEDIA_TYPE_AUDIO) {
+            AVStream newStream = null;
+            int type = stream.codecpar().codec_type();
+            if (type == avutil.AVMEDIA_TYPE_AUDIO) {
+                if (audioStream == null) {
+                    newStream = avformat.avformat_new_stream(outputContext, null);
+                    if (newStream == null) {
+                        return false;
+                    }
                     audioStream = newStream;
                 }
-                if (stream.codecpar().codec_type() == avutil.AVMEDIA_TYPE_VIDEO) {
+                avcodec.avcodec_parameters_copy(audioStream.codecpar(), stream.codecpar());
+                audioStream.codecpar().codec_tag(0);
+            } else if (type == avutil.AVMEDIA_TYPE_VIDEO) {
+                if (videoStream == null) {
+                    newStream = avformat.avformat_new_stream(outputContext, null);
+                    if (newStream == null) {
+                        return false;
+                    }
                     videoStream = newStream;
                 }
+                avcodec.avcodec_parameters_copy(videoStream.codecpar(), stream.codecpar());
+                videoStream.codecpar().codec_tag(0);
             }
         }
 
@@ -130,6 +146,14 @@ public class FFMpegWriter implements Closeable {
         return targetFile;
     }
 
+    public void abort() {
+        exception = true;
+    }
+
+    public boolean isFailed() {
+        return exception;
+    }
+
     @Override
     public void close()  {
 
@@ -142,7 +166,7 @@ public class FFMpegWriter implements Closeable {
         }
 
         if (outputContext != null && !outputContext.isNull()) {
-            if (opend) {
+            if (opend && !exception) {
                 avformat.av_write_trailer(outputContext);
             }
             if (outputContext.pb() != null && !outputContext.pb().isNull()) {
@@ -155,4 +179,5 @@ public class FFMpegWriter implements Closeable {
         headerWritten = false;
 
     }
+
 }
