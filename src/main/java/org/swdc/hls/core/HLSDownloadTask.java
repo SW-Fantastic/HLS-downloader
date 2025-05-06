@@ -21,6 +21,7 @@ import java.net.HttpURLConnection;
 import java.net.URI;
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executors;
 
 public class HLSDownloadTask {
 
@@ -116,18 +117,26 @@ public class HLSDownloadTask {
 
         latch = new CountDownLatch(segmentUrls.size());
         progress.set(0);
-        for (int i = 0; i < segmentUrls.size(); i++) {
 
-            HLSSegment segmentUrl = segmentUrls.get(i);
+        int batch = 100;
+        for (int i = 0; i < (segmentUrls.size() / batch) + 1; i++) {
+            int curBat = i;
+            int min = i * batch;
+            int max = min + batch < segmentUrls.size() ? min + batch : min + (segmentUrls.size() - min);
             Thread.ofVirtual().start(() -> {
-                try {
-                    downloadSegments(segmentUrl, segmentDir,0, 5);
-                    progress.set((segmentUrls.size() - latch.getCount()) / (double) segmentUrls.size());
-                    status.set("正在下载");
-                } catch (Exception e) {
-                    logger.error("Error downloading segment: " + e.getMessage());
+                for (int cur = min; cur < max; cur ++) {
+                    try {
+                        HLSSegment segmentUrl = segmentUrls.get(cur);
+                        downloadSegments(segmentUrl, segmentDir,0, 5);
+                        progress.set((segmentUrls.size() - latch.getCount()) / (double) segmentUrls.size());
+                        status.set("正在下载");
+                    } catch (Exception e) {
+                        logger.error("Error downloading segment: " + e.getMessage());
+                    } finally {
+                        latch.countDown();
+                    }
                 }
-                latch.countDown();
+                logger.info("Batch : " + curBat + " complete, rest : " + latch.getCount());
             });
         }
         try {
@@ -228,7 +237,8 @@ public class HLSDownloadTask {
             if (fos != null) {
                 try {
                     fos.close();
-                } catch (IOException ignored) {}
+                } catch (IOException ignore) {
+                }
             }
             if (target != null && target.exists()) {
                 target.delete();

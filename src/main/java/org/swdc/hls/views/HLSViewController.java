@@ -1,6 +1,7 @@
 package org.swdc.hls.views;
 
 import jakarta.inject.Inject;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.TableColumn;
@@ -164,11 +165,27 @@ public class HLSViewController extends ViewController<HLSMainView> {
         txtFileName.setText("");
 
         resources.getExecutor().submit(() -> {
-            HLSDownloadTask task = new HLSDownloadTask(fileName, hlsUrl, txtOutput.getText());
-            taskTableView.getItems().add(task);
-            task.initPlayList();
-            task.download();
-            task.merge();
+
+            try {
+                HLSDownloadTask task = new HLSDownloadTask(fileName, hlsUrl, txtOutput.getText());
+                if (task.initPlayList()) {
+                    Platform.runLater(() -> {
+                        taskTableView.getItems().add(task);
+                    });
+                    task.download();
+                    task.merge();
+                } else {
+                    Platform.runLater(() -> {
+                        Alert alert = view.alert("提示", "读取链接失败", Alert.AlertType.ERROR);
+                        alert.showAndWait();
+                    });
+
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+
         });
     }
 

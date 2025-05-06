@@ -45,6 +45,8 @@ public class HLSSegment {
         connection.setRequestMethod("GET");
         connection.setDoInput(true);
         connection.setDoOutput(false);
+        connection.setConnectTimeout(1000 * 30);
+        connection.setReadTimeout(1000 * 30);
         connection.connect();
         return connection;
     }
